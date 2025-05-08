@@ -2,16 +2,22 @@ import React, { useEffect, useState } from "react";
 
 const PokemonCard = ({ name, image }) => {
   const [pokemon, setPokemon] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const API = "https://pokeapi.co/api/v2/pokemon/65";
+  const API = "https://pokeapi.co/api/v2/pokemon/7";
 
-  const fetchPokemon = () => {
-    fetch(API)
-      .then((res) => res.json())
-      .then((pokemon) => {
-        setPokemon(pokemon);
-      })
-      .catch((err) => console.error(err));
+  const fetchPokemon = async () => {
+    try {
+      const res = await fetch(API);
+      const data = await res.json();
+      setPokemon(data);
+      setLoading(false);
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+     
   };
 
   useEffect(() => {
@@ -19,6 +25,20 @@ const PokemonCard = ({ name, image }) => {
   }, []);
 
   console.log(pokemon);
+
+  if(loading){
+    return(
+      <h1 className="text-center bg-red-500 h-4">Loading....</h1>
+    )
+  }
+
+  if(error){
+    return(
+      <div>
+        <h1 className="text-center bg-red-500 h-4">Error: {error.message}</h1>
+      </div>
+    )
+  }
 
   const imageUrl = pokemon?.sprites?.other?.["official-artwork"]?.front_default;
 
@@ -36,6 +56,13 @@ const PokemonCard = ({ name, image }) => {
             <h2 className="text-center mt-4 text-xl font-bold capitalize">
               {pokemon.name}
             </h2>
+            <div className="mt-4 text-sm text-gray-700 space-y-1 text-center">
+                <p><strong>Height:</strong> {pokemon.height}</p>
+                <p><strong>Weight:</strong> {pokemon.weight}</p>
+                <p><strong>Speed:</strong> {
+                  pokemon.stats.find(stat => stat.stat.name === 'speed')?.base_stat
+                }</p>
+             </div>
           </div>
         </div>
       </>
