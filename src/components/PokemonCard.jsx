@@ -7,7 +7,7 @@ const PokemonCard = ({ name, image }) => {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
-  const API = "https://pokeapi.co/api/v2/pokemon?limit=100";
+  const API = "https://pokeapi.co/api/v2/pokemon?limit=400";
 
   const fetchPokemon = async () => {
     try {
@@ -69,7 +69,7 @@ const PokemonCard = ({ name, image }) => {
                 <span>Search Your Fav:</span>
                 <input
                   type="text"
-                  placeholder="Search Pokemon..."
+                  placeholder="Pokemon..."
                   className="border border-gray-600 rounded-lg px-3 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent"
                   value={search} 
                   onChange={(e) => {setSearch(e.target.value)}}
