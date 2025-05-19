@@ -1,43 +1,53 @@
 import React, { useEffect, useState } from "react";
+import PokemonInfo from "./PokemonInfo";
 
 const PokemonCard = ({ name, image }) => {
-  const [pokemon, setPokemon] = useState(null);
+  const [pokemon, setPokemon] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const API = "https://pokeapi.co/api/v2/pokemon/7";
+  const API = "https://pokeapi.co/api/v2/pokemon?limit=30";
 
   const fetchPokemon = async () => {
     try {
       const res = await fetch(API);
       const data = await res.json();
-      setPokemon(data);
+
+      //console.log(data);
+
+      const detailedPokemonData = await Promise.all(
+        data.results.map(async (currData) => {
+          const res = await fetch(currData.url);
+          const data = await res.json();
+
+          return data;
+        })
+      );
+
+      console.log(detailedPokemonData);
+      setPokemon(detailedPokemonData);
+
       setLoading(false);
     } catch (error) {
-      setError(error.message);
+      setError(error);
       setLoading(false);
     }
-     
   };
 
   useEffect(() => {
     fetchPokemon();
   }, []);
 
-  console.log(pokemon);
-
-  if(loading){
-    return(
-      <h1 className="text-center bg-red-500 h-4">Loading....</h1>
-    )
+  if (loading) {
+    return <h1 className="text-center bg-red-500 h-10 text-2xl">Loading....</h1>;
   }
 
-  if(error){
-    return(
+  if (error) {
+    return (
       <div>
-        <h1 className="text-center bg-red-500 h-4">Error: {error.message}</h1>
+        <h1 className="text-center  bg-red-500 h-10 text-2xl">Error: {error.message}</h1>
       </div>
-    )
+    );
   }
 
   const imageUrl = pokemon?.sprites?.other?.["official-artwork"]?.front_default;
@@ -45,26 +55,32 @@ const PokemonCard = ({ name, image }) => {
   if (pokemon) {
     return (
       <>
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-300 to-purple-400">
-          <div className="group relative w-72 h-96 bg-slate-200 rounded-xl shadow-xl transform transition-transform duration-500 hover:rotate-2 hover:scale-120 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/20 opacity-0 group-hover:opacity-100 transition duration-700 pointer-events-none" />
-            <img
-              src={imageUrl}
-              alt={pokemon.name}
-              className="w-32 h-32 object-contain mx-auto mt-8"
-            />
-            <h2 className="text-center mt-4 text-xl font-bold capitalize">
-              {pokemon.name}
-            </h2>
-            <div className="mt-4 text-sm text-gray-700 space-y-1 text-center">
-                <p><strong>Height:</strong> {pokemon.height}</p>
-                <p><strong>Weight:</strong> {pokemon.weight}</p>
-                <p><strong>Speed:</strong> {
-                  pokemon.stats.find(stat => stat.stat.name === 'speed')?.base_stat
-                }</p>
-             </div>
+        <section>
+          <header>
+            <h1 className="text-center text-2xl font-bold">Pokemon Army</h1>
+
+            <div className="flex items-center justify-center mt-6 font-semibold">
+              <h2 className="text-2xl flex items-center gap-x-4">
+                <span>Search Your Fav:</span>
+                <input
+                  type="text"
+                  placeholder="Search Pokemon..."
+                  className="border border-gray-600 rounded-lg px-3 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent"
+                />
+              </h2>
+            </div>
+          </header>
+
+          <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-300 to-purple-400"> 
+            <ul className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-3 lg:grid-cols-4 gap-8 p-8">
+              {
+                pokemon.map((currPokemon) => {
+                  return <PokemonInfo key={currPokemon.id} pokemonData ={ currPokemon }/>
+                })
+              }
+            </ul>
           </div>
-        </div>
+        </section>
       </>
     );
   }
